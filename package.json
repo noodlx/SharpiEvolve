@@ -1,0 +1,49 @@
+{
+    "name": "sharpievolve",
+    "version": "1.0.0",
+    "description": "A small webapp for MTG card lookup, with special functions geared for the sharpie cube format.",
+    "main": "index.js",
+    "scripts": {
+        "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+        "start:backend": "node backend/src/server.js",
+        "start:frontend": "npm start --prefix frontend",
+        "build": "npm run build:frontend && npm run build:backend",
+        "build:frontend": "npm run build --prefix frontend",
+        "build:backend": "echo \"No build step for backend\"",
+        "test": "npm run test:frontend && npm run test:backend",
+        "test:frontend": "npm test --prefix frontend",
+        "test:backend": "echo \"No tests for backend yet\""
+    },
+    "workspaces": [
+        "backend",
+        "frontend"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/noodlx/SharpiEvolve.git"
+    },
+    "keywords": [
+        "JavaScript",
+        "React",
+        "Express",
+        "Node.js",
+        "SQLite",
+        "REST",
+        "MTG",
+        "Form",
+        "Async",
+        "Subsequence"
+    ],
+    "author": "noodlie",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/noodlx/SharpiEvolve/issues"
+    },
+    "homepage": "https://github.com/noodlx/SharpiEvolve#readme",
+    "devDependencies": {
+        "concurrently": "^9.0.1"
+    },
+    "dependencies": {
+        "sanitize-html": "^2.13.1"
+    }
+}

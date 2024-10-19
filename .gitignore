@@ -1,0 +1,22 @@
+# Node.js
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# dotenv environment variables file
+.env
+
+# Workspace directories
+backend/node_modules/
+backend/data/AllPrintings.sqlite
+backend/data/mtg_cardsbu.db
+frontend/node_modules/
+frontend/public/assets/
+backend/src/serverbu.js
+backend/src/servertest.js
+frontend/src/formbu.js
+frontend/src/formtest.js
+
+# Ignore lock files
+package-lock.json
