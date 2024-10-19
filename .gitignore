@@ -8,6 +8,7 @@ node_modules/
 .env
 
 # Workspace directories
+backend/data/
 backend/node_modules/
 backend/data/AllPrintings.sqlite
 backend/data/mtg_cardsbu.db
