@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-
+const sanitizeHtml = require('sanitize-html');
 
 const app = express();
 const port = 8000;
@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.get('/endpoint', async (req, res) => {
-  const { name, text, colors, types, subtypes, supertype, matchColorsExactly, matchTypesExactly, page = 1 } = req.query;
+  let { name, text, colors, types, subtypes, supertype, matchColorsExactly, matchTypesExactly, page = 1 } = req.query;
   const lookupMode = req.query.lookupMode === 'true';
   const limit = 50;
   const offset = (page - 1) * limit;
@@ -142,7 +142,7 @@ app.get('/endpoint', async (req, res) => {
       params.push(`%${supertype}%`);
     }
   }
-  query += ' LIMIT ? OFFSET ?';
+  query += ' ORDER BY LENGTH(realText) ASC LIMIT ? OFFSET ?';
   params.push(limit, offset);
   console.log('Constructed SQL query:', query);
   console.log('Query parameters:', params);

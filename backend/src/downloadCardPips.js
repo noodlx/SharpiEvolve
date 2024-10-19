@@ -46,7 +46,7 @@ const main = async () => {
     for (const symbol of symbols) {
       const { symbol: symbolText, svg_uri: svgUri } = symbol;
       const sanitizedSymbolText = symbolText.replace(/[{}]/g, ''); // Remove curly braces
-      const filepath = path.join(__dirname, 'assets/symbols', `${sanitizedSymbolText}.svg`);
+      const filepath = path.join(__dirname, '../../frontend/public/assets/symbols', `${sanitizedSymbolText}.svg`);
 
       // Ensure the directory exists
       fs.mkdirSync(path.dirname(filepath), { recursive: true });
