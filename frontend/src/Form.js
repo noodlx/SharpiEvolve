@@ -1,5 +1,5 @@
 import './Form.css';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 import 'bulma/css/bulma.min.css';
 
@@ -8,7 +8,6 @@ function Form() {
   const [text, setText] = useState('');
   const [results, setResults] = useState([]);
   const [page, setPage] = useState(1); // State for current page
-  const [totalResults, setTotalResults] = useState(0); // State for total results
   const [colors, setColors] = useState([]);
   const [types, setTypes] = useState([]);
   const [supertype, setSupertype] = useState(''); // State for supertype
@@ -18,7 +17,7 @@ function Form() {
   const [lookupMode, setLookupMode] = useState(true); // true for 'Lookup', false for 'Sharpie Match'
   const [searchSubmitted, setSearchSubmitted] = useState(false); // State to track if a search has been submitted
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = useCallback((event) => {
     event.preventDefault();
 
     // Validation check: Ensure at least one field is filled
@@ -28,19 +27,13 @@ function Form() {
     }
 
     setSearchSubmitted(true); // Set searchSubmitted to true when a search is submitted
-  };
+  }, [name, text, colors, types, supertype, subtypes]);
 
-  useEffect(() => {
-    if (searchSubmitted) {
-      fetchResults(1); // Reset to first page on new search
-      setSearchSubmitted(false); // Reset searchSubmitted state
-    }
-  }, [searchSubmitted]);
 
-  const fetchResults = async (page) => {
+  const fetchResults = useCallback(async (page) => {
     const sanitizedText = text.replace(/\{[^}]*\}/g, ''); // Remove {} and all text within
     const query = new URLSearchParams({ name, text: sanitizedText, page, colors: colors.sort().join(','), types: types.sort().join(','), supertype, subtypes: subtypes.split(' ').map(subtype => subtype.trim()).join(','), matchColorsExactly, matchTypesExactly, lookupMode }).toString();
-
+  
     // Debug output for parameters
     console.log('Fetching results with the following parameters:');
     console.log('Name:', name);
@@ -53,19 +46,25 @@ function Form() {
     console.log('Match Colors Exactly:', matchColorsExactly);
     console.log('Match Types Exactly:', matchTypesExactly);
     console.log('Lookup Mode:', lookupMode);
+  
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    console.log('Request Headers:', headers);
+    const url = `http://localhost:8080/endpoint?${query}`;
+  console.log('Request URL:', url);
+  console.log('URL Length:', url.length);
 
     try {
-      const response = await fetch(`http://localhost:8000/endpoint?${query}`, {
+      const response = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
+        headers: headers,
+      }, []);
+  
       if (response.ok) {
         const data = await response.json();
-        setResults(data);
-        setTotalResults(data.length); // Assuming the server returns the total number of results
+        setResults(data); // Assuming the server returns the total number of results
         setPage(page); // Update the current page
         console.log('Data retrieved successfully', data);
       } else {
@@ -74,21 +73,28 @@ function Form() {
     } catch (error) {
       console.error('Error:', error);
     }
-  };
+  }, [name, text, colors, types, supertype, subtypes, matchColorsExactly, matchTypesExactly, lookupMode]);
+  
+  useEffect(() => {
+    if (searchSubmitted) {
+      fetchResults(1); // Reset to first page on new search
+      setSearchSubmitted(false); // Reset searchSubmitted state
+    }
+  }, [searchSubmitted, fetchResults]);
 
-  const handleNextPage = () => {
+  const handleNextPage = useCallback(() => {
     console.log('running handleNextPage...');
     fetchResults(page + 1);
-  };
+  }, [page, fetchResults]);
 
-  const handlePreviousPage = () => {
+  const handlePreviousPage = useCallback(() => {
     console.log('running handlePreviousPage...');
     if (page > 1) {
       fetchResults(page - 1);
     }
-  };
+  }, [page, fetchResults]);
 
-  const replaceSymbolsWithSVGs = (text) => {
+  const replaceSymbolsWithSVGs = useCallback((text) => {
     if (!text) return ''; // Return an empty string if text is null or undefined
     //console.log('PreSVGtext:', text);
     console.log('running replaceSymbolsWithSVGs...');
@@ -109,7 +115,7 @@ function Form() {
         insideBraces = false;
       }
 
-      if (text[i] === '\\' && !insideBraces && text[i + 1] == 'n') {
+      if (text[i] === '\\' && !insideBraces && text[i + 1] === 'n') {
         result += '<br>';
         i++;
       } else {
@@ -119,9 +125,9 @@ function Form() {
 
     //console.log('post-replacement text:', result);
     return result;
-  };
+  }, []);
 
-  const getCardImagePath = (card) => {
+  const getCardImagePath = useCallback((card) => {
     if (!card || !card.rowid) {
       console.error('Invalid card object or missing artID:', card);
       return '/assets/cards/default.jpg'; // Return a default image path or handle the error as needed
@@ -134,35 +140,35 @@ function Form() {
     const thirdDigit = rowidString[2];
     const imagePath = `/assets/cards/${firstDigit}/${secondDigit}/${thirdDigit}/${card.rowid}.jpg`;
     return imagePath;
-  };
+  }, []);
 
-  const getFallbackImagePath = (card) => {
+  const getFallbackImagePath = useCallback((card) => {
     const placeholderImagePath = '/assets/placeholder.jpg';
     return placeholderImagePath;
-  };
+  }, []);
 
-  const handleColorChange = (event) => {
+  const handleColorChange = useCallback((event) => {
     const value = event.target.value;
     setColors(prevColors => 
       prevColors.includes(value) ? prevColors.filter(color => color !== value) : [...prevColors, value]
     );
-  };
+  }, [setColors]);
 
-  const handleTypeChange = (event) => {
+  const handleTypeChange = useCallback((event) => {
     const value = event.target.value;
     setTypes(prevTypes => 
       prevTypes.includes(value) ? prevTypes.filter(type => type !== value) : [...prevTypes, value]
     );
-  };
+  }, [setTypes]);
 
-  const handleSupertypeChange = (event) => {
+  const handleSupertypeChange = useCallback((event) => {
     const value = event.target.checked ? 'Legendary' : '';
     setSupertype(value);
-  };
+  }, [setSupertype]);
 
-  const handleSubtypesChange = (event) => {
+  const handleSubtypesChange = useCallback((event) => {
     setSubtypes(event.target.value);
-  };
+  }, [setSubtypes]);
 
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -175,7 +181,7 @@ function Form() {
     return () => {
       window.removeEventListener('keypress', handleKeyPress);
     };
-  }, [name, text, colors, types, supertype, subtypes, matchColorsExactly, matchTypesExactly, lookupMode]);
+  }, [handleSubmit]);
 
   // Memoize the results with SVG replacements
   const memoizedResults = useMemo(() => {
@@ -184,7 +190,7 @@ function Form() {
       memoizedManaCost: replaceSymbolsWithSVGs(card.manaCost),
       memoizedAllText: replaceSymbolsWithSVGs(card.allText)
     }));
-  }, [results]);
+  }, [results, replaceSymbolsWithSVGs]);
 
   return ( 
     <div className="container">

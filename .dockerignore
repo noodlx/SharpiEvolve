@@ -1,0 +1,18 @@
+# Node.js
+
+# Optional npm cache directory
+.npm
+
+# dotenv environment variables file
+.env
+
+# Workspace directories
+
+backend/data/AllPrintings.sqlite
+backend/data/mtg_cardsbu.db
+backend/data/script.py
+backend/src/serverbu.js
+backend/src/servertest.js
+frontend/src/formbu.js
+frontend/src/formtest.js
+frontend/public/assets/cards

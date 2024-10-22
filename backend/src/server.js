@@ -4,9 +4,10 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const sanitizeHtml = require('sanitize-html');
+const os = require('os');
 
 const app = express();
-const port = 8000;
+const port = 8080;
 
 // Connect to the SQLite database
 const dbPath = path.resolve(__dirname, '../data/mtg_cards.db');
@@ -18,7 +19,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
 app.use(cors());
 
 app.get('/endpoint', async (req, res) => {
@@ -45,15 +46,14 @@ app.get('/endpoint', async (req, res) => {
   const params = [];
 
   if (text) {
-    //Simple Lookup Mode Block
+    // Simple Lookup Mode Block
     if (lookupMode) {
       query += ' AND allText LIKE ?';
       const param = `%${text}%`;
       console.log('Parameter for lookupMode:', param);
       params.push(param);
-    } else {  //Sharpie Match Mode Block
+    } else {  // Sharpie Match Mode Block
       let noSpaceText = text.replace(/\s/g, '_');  
-      //query = 'SELECT rowid, artID, name, faceName, allText, supertypes, type, types, subtypes, colors, power, toughness, manaCost, rarity, layout, side, setCode FROM cards WHERE rowid IN (SELECT rowid FROM cards_fts WHERE text LIKE ?)';
       query = 'SELECT rowid, artID, name, faceName, allText, supertypes, type, types, subtypes, colors, power, toughness, manaCost, rarity, layout, side, setCode FROM cards WHERE realText LIKE ?';
       const param = `%${noSpaceText.split('').join('%')}%`;
       console.log('Parameter for Sharpie Match Mode:', param);
@@ -118,7 +118,7 @@ app.get('/endpoint', async (req, res) => {
       params.push(subtypeArray.join(', '));
     } else {
       query += ' AND (';
-      let typeCount = typeArray.length;
+      let typeCount = subtypeArray.length;
       subtypeArray.forEach(subtype => {
         query += ' subtypes LIKE ?';
         if (typeCount > 1) {
@@ -148,7 +148,6 @@ app.get('/endpoint', async (req, res) => {
   console.log('Query parameters:', params);
 
   try {
-
     db.all(query, params, (err, rows) => {
       if (err) {
         console.error('Error executing query:', err.message);
@@ -233,5 +232,8 @@ app.get('/endpoint', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  const hostname = process.env.HOSTNAME || '0.0.0.0';
+  const protocol = process.env.PROTOCOL || 'http';
+  const fullUrl = `${protocol}://${hostname}:${port}`;
+  console.log(`Server is running at ${fullUrl}`);
 });

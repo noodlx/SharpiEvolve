@@ -6,7 +6,7 @@
     "scripts": {
         "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
         "start:backend": "node backend/src/server.js",
-        "start:frontend": "npm start --prefix frontend",
+        "start:frontend": "DANGEROUSLY_DISABLE_HOST_CHECK=true npm start --prefix frontend",
         "build": "npm run build:frontend && npm run build:backend",
         "build:frontend": "npm run build --prefix frontend",
         "build:backend": "echo \"No build step for backend\"",
@@ -41,9 +41,10 @@
     },
     "homepage": "https://github.com/noodlx/SharpiEvolve#readme",
     "devDependencies": {
-        "concurrently": "^9.0.1"
+        "@flydotio/dockerfile": "^0.5.9"
     },
     "dependencies": {
+        "concurrently": "^9.0.1",
         "sanitize-html": "^2.13.1"
     }
 }
