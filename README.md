@@ -3,10 +3,17 @@ A small webapp for MTG card lookup, with special functions geared for the sharpi
 
 demo pic: https://imgur.com/a/pBmJxkh
 
-
 TO_DO:
 - Documentation
 - HTTPS
 - Carousels for alternate card printings
 - TCG Market linking
-- Figure out where to deploy
+- Unit Tests
+- Automate specific database constructors in build script
+- maybe phase out concurrently and deploy front/backend as seperate apps for simpler dependency??
+- Finalize Deployment
+
+CHANGELOG (deployment branch):
+- dockerized 😎
+- callback better implemented to handle state
+- switched from get to post
